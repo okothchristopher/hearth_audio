@@ -7,7 +7,39 @@ type Failure<R extends string> = { ok: false; reason: R; message: string };
 
 export type BookingResult =
   | { ok: true; startDate: string; returnDate: string }
-  | Failure<"signin" | "conflict" | "invalid" | "error">;
+  | Failure<"signin" | "conflict" | "swap-first" | "invalid" | "error">;
+
+export type BookingStart =
+  | { status: "signin" }
+  /** Free to book from `earliest` (today, or the swap collection day) */
+  | { status: "ready"; earliest: string; swapFrom?: string }
+  /** Has a speaker and no swap booked yet */
+  | { status: "swap-first"; current: string };
+
+/** What the Rent button should do for the signed-in renter (one speaker at a time, migration 0003). */
+export async function getBookingStart(): Promise<BookingStart> {
+  const supabase = await createUserClient();
+  const user = await getSignedInUser(supabase);
+  if (!user) return { status: "signin" };
+
+  const { data, error } = await supabase
+    .from("rentals")
+    .select("collection_date, speakers(name)")
+    .eq("person_id", user.id)
+    .is("returned_at", null);
+  if (error) throw error;
+
+  const today = todayInNairobi();
+  const active = data as unknown as { collection_date: string | null; speakers: { name: string } | null }[];
+  if (active.length === 0) return { status: "ready", earliest: today };
+  // A swap in progress may already have its next speaker booked; only one more is allowed
+  const pending = active.find((r) => r.collection_date === null);
+  if (pending || active.length > 1) {
+    return { status: "swap-first", current: (pending ?? active[0]).speakers?.name ?? "speaker" };
+  }
+  const collection = active[0].collection_date!;
+  return { status: "ready", earliest: collection > today ? collection : today, swapFrom: active[0].speakers?.name };
+}
 
 /** Book a speaker for 30 days. Overlaps are rejected by the database (rentals_no_overlap). */
 export async function bookSpeaker(speakerId: string, startDate: string): Promise<BookingResult> {
@@ -25,6 +57,9 @@ export async function bookSpeaker(speakerId: string, startDate: string): Promise
 
   if (error?.code === "23P01") {
     return { ok: false, reason: "conflict", message: "Someone just booked this speaker. Choose different dates or another speaker." };
+  }
+  if (error?.code === "HA001") {
+    return { ok: false, reason: "swap-first", message: "You already have a speaker. Swap it first, then rent this one from your collection day." };
   }
   if (error) {
     console.error("bookSpeaker", error);

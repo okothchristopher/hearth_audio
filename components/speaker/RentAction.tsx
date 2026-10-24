@@ -1,8 +1,9 @@
 "use client";
 
+import { Repeat } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { bookSpeaker, type BookingResult } from "@/app/(renter)/actions";
+import { bookSpeaker, getBookingStart, type BookingResult } from "@/app/(renter)/actions";
 import { SignInSheet } from "@/components/account/SignInSheet";
 import { Button, Dialog, TextField } from "@/components/ui";
 import { RENTAL_DAYS, addDays, formatDate, formatShortDate, todayInNairobi } from "@/lib/dates";
@@ -19,15 +20,32 @@ type Props = {
   layout: "aside" | "bar";
 };
 
+type Sheet =
+  | { kind: "signin" }
+  | { kind: "swap-first"; current: string }
+  | { kind: "booking"; earliest: string; swapFrom?: string }
+  | null;
+
 export function RentAction({ speakerId, speakerName, price, unavailableLabel, layout }: Props) {
   const user = useUser();
-  const [sheet, setSheet] = useState<"signin" | "booking" | null>(null);
+  const [sheet, setSheet] = useState<Sheet>(null);
+  const [checking, startCheck] = useTransition();
+
+  // One speaker at a time: decide between sign-in, swap first, or booking (and from which day)
+  const openNext = () =>
+    startCheck(async () => {
+      const start = await getBookingStart().catch(() => ({ status: "ready" as const, earliest: todayInNairobi() }));
+      if (start.status === "signin") return setSheet({ kind: "signin" });
+      if (start.status === "swap-first") return setSheet({ kind: "swap-first", current: start.current });
+      setSheet({ kind: "booking", earliest: start.earliest, swapFrom: "swapFrom" in start ? start.swapFrom : undefined });
+    });
+
   const button = (
     <Button
       size="lg"
       block={layout === "aside"}
-      disabled={!!unavailableLabel}
-      onClick={() => setSheet(user ? "booking" : "signin")}
+      disabled={!!unavailableLabel || checking}
+      onClick={() => (user ? openNext() : setSheet({ kind: "signin" }))}
     >
       {unavailableLabel ?? "Rent for a month"}
     </Button>
@@ -49,20 +67,41 @@ export function RentAction({ speakerId, speakerName, price, unavailableLabel, la
           {button}
         </div>
       )}
-      {sheet === "signin" && (
-        <SignInSheet
-          context={`Sign in to rent the ${speakerName}.`}
-          onClose={() => setSheet(null)}
-          onSignedIn={() => setSheet("booking")}
-        />
+      {sheet?.kind === "signin" && (
+        <SignInSheet context={`Sign in to rent the ${speakerName}.`} onClose={() => setSheet(null)} onSignedIn={openNext} />
       )}
-      {sheet === "booking" && (
+      {sheet?.kind === "swap-first" && (
+        <Dialog
+          sheet
+          title="Swap your speaker first"
+          onClose={() => setSheet(null)}
+          actions={
+            <>
+              <Button variant="ghost" onClick={() => setSheet(null)}>
+                Cancel
+              </Button>
+              <Button href="/swap" iconStart={Repeat}>
+                Swap your speaker
+              </Button>
+            </>
+          }
+        >
+          <p>
+            You have the {sheet.current} at home. Swap it to rent the {speakerName}. We deliver the next speaker on the day we
+            collect yours.
+          </p>
+        </Dialog>
+      )}
+      {sheet?.kind === "booking" && (
         <BookingSheet
           speakerId={speakerId}
           speakerName={speakerName}
           price={price}
+          earliest={sheet.earliest}
+          swapFrom={sheet.swapFrom}
           onClose={() => setSheet(null)}
-          onNeedsSignIn={() => setSheet("signin")}
+          onNeedsSignIn={() => setSheet({ kind: "signin" })}
+          onSwapFirst={(current) => setSheet({ kind: "swap-first", current })}
         />
       )}
     </>
@@ -73,26 +112,35 @@ function BookingSheet({
   speakerId,
   speakerName,
   price,
+  earliest,
+  swapFrom,
   onClose,
   onNeedsSignIn,
+  onSwapFirst,
 }: {
   speakerId: string;
   speakerName: string;
   price: string;
+  /** First bookable day: today, or the swap collection day */
+  earliest: string;
+  /** Name of the speaker being swapped out, when booking the next one */
+  swapFrom?: string;
   onClose: () => void;
   onNeedsSignIn: () => void;
+  onSwapFirst: (current: string) => void;
 }) {
   const router = useRouter();
-  const today = todayInNairobi();
-  const [start, setStart] = useState(today);
+  const [start, setStart] = useState(earliest);
   const [result, setResult] = useState<BookingResult>();
   const [pending, startTransition] = useTransition();
-  const valid = /^\d{4}-\d{2}-\d{2}$/.test(start) && start >= today;
+  const valid = /^\d{4}-\d{2}-\d{2}$/.test(start) && start >= earliest;
+  const earliestMessage = earliest === todayInNairobi() ? "Choose today or a later date." : `Choose ${formatDate(earliest)} or later.`;
 
   const confirm = () =>
     startTransition(async () => {
       const r = await bookSpeaker(speakerId, start);
       if (!r.ok && r.reason === "signin") return onNeedsSignIn();
+      if (!r.ok && r.reason === "swap-first") return onSwapFirst(swapFrom ?? "current speaker");
       setResult(r);
       if (r.ok) router.refresh(); // status chips and My rental
     });
@@ -134,17 +182,22 @@ function BookingSheet({
       }
     >
       <div className="ha-booking">
+        {swapFrom && (
+          <p className="ha-booking__swap">
+            We deliver it on {formatDate(earliest)}, the day we collect your {swapFrom}.
+          </p>
+        )}
         <TextField
           label="Start date"
           type="date"
-          min={today}
+          min={earliest}
           value={start}
           onChange={(e) => {
             setStart(e.currentTarget.value);
             setResult(undefined);
           }}
           hint="We deliver on this day."
-          error={valid ? undefined : "Choose today or a later date."}
+          error={valid ? undefined : earliestMessage}
         />
         <dl className="ha-summary">
           <div>

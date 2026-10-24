@@ -1,4 +1,5 @@
 import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { RentAction } from "@/components/speaker/RentAction";
 import { Button, ErrorBanner, ListeningNote, RetryButton, SpeakerPhoto, StarRating, StatusChip } from "@/components/ui";
@@ -26,13 +27,16 @@ function BackLink() {
   );
 }
 
-export default async function SpeakerPage({ params }: PageProps<"/speakers/[id]">) {
-  const { id } = await params;
+const NOTES_SHOWN = 5;
+
+export default async function SpeakerPage({ params, searchParams }: PageProps<"/speakers/[id]">) {
+  const [{ id }, query] = await Promise.all([params, searchParams]);
+  const showAll = query.notes === "all";
 
   let speaker: Speaker | undefined;
   let notes: Note[];
   try {
-    [speaker, notes] = await Promise.all([getSpeaker(id), getListeningNotes(id)]);
+    [speaker, notes] = await Promise.all([getSpeaker(id), getListeningNotes(id, showAll ? 500 : NOTES_SHOWN)]);
   } catch {
     return (
       <div className="ha-speaker">
@@ -121,6 +125,11 @@ export default async function SpeakerPage({ params }: PageProps<"/speakers/[id]"
             ))
           ) : (
             <p className="ha-speaker__no-notes">No listening notes yet. Be the first to rent this speaker and write one.</p>
+          )}
+          {!showAll && speaker.noteCount > notes.length && (
+            <Link href={`/speakers/${id}?notes=all#speaker-notes`} className="ha-speaker__all-notes">
+              Show all {speaker.noteCount} notes
+            </Link>
           )}
         </section>
       </div>
