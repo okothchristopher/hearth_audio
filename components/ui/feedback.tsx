@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, CircleAlert, Info, X } from "lucide-react";
+import { Check, CircleAlert, Info, X, type LucideIcon } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
 import { IconButton } from "./Button";
 
@@ -50,6 +50,48 @@ export function Toast({
           <X size={16} />
         </button>
       )}
+    </div>
+  );
+}
+
+/** Centred empty/success panel (prototype MessagePanel). Put Buttons in `actions`. */
+export function MessagePanel({
+  icon: Icon,
+  title,
+  children,
+  actions,
+}: {
+  icon?: LucideIcon;
+  title: string;
+  children?: ReactNode;
+  actions?: ReactNode;
+}) {
+  return (
+    <div role="status" className="ha-message">
+      {Icon && (
+        <span className="ha-message__icon">
+          <Icon size={40} strokeWidth={1.5} />
+        </span>
+      )}
+      <h2 className="ha-message__title">{title}</h2>
+      {children && <p className="ha-message__body">{children}</p>}
+      {actions && <div className="ha-message__actions">{actions}</div>}
+    </div>
+  );
+}
+
+/** Inline load/save failure (prototype ErrorBanner). */
+export function ErrorBanner({ title, children, action }: { title: string; children?: ReactNode; action?: ReactNode }) {
+  return (
+    <div role="alert" className="ha-error-banner">
+      <span className="ha-error-banner__icon">
+        <CircleAlert size={20} />
+      </span>
+      <div className="ha-error-banner__text">
+        <p className="ha-error-banner__title">{title}</p>
+        {children && <p>{children}</p>}
+      </div>
+      {action}
     </div>
   );
 }

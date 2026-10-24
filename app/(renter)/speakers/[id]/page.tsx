@@ -2,19 +2,22 @@ import { ArrowLeft } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Placeholder } from "@/components/shell/Placeholder";
 import { Button } from "@/components/ui";
-import { sampleSpeakers } from "@/lib/sample-speakers";
+import { formatKes, getSpeaker, getSpeakers } from "@/lib/speakers";
 
-export function generateStaticParams() {
-  return sampleSpeakers.map(({ id }) => ({ id }));
+export async function generateStaticParams() {
+  return (await getSpeakers()).map(({ id }) => ({ id }));
 }
 
 export default async function SpeakerPage({ params }: PageProps<"/speakers/[id]">) {
-  const { id } = await params;
-  const speaker = sampleSpeakers.find((s) => s.id === id);
+  const speaker = await getSpeaker((await params).id);
   if (!speaker) notFound();
 
   return (
-    <Placeholder eyebrow="Speaker page" title={speaker.name} lead={`${speaker.summary}. ${speaker.price} / month.`}>
+    <Placeholder
+      eyebrow="Speaker page"
+      title={speaker.name}
+      lead={`${speaker.type}. ${formatKes(speaker.pricePerMonth)} / month.`}
+    >
       <Button href="/" variant="ghost" iconStart={ArrowLeft}>
         Back to speakers
       </Button>

@@ -1,12 +1,15 @@
 "use client";
 
-import { ArrowRight, Heart } from "lucide-react";
+import { ArrowRight, Heart, Speaker } from "lucide-react";
 import { useState } from "react";
 import {
   Button,
   Card,
   Checkbox,
   Dialog,
+  ErrorBanner,
+  MessagePanel,
+  SpeakerCardSkeleton,
   FilterTag,
   IconButton,
   ListeningNote,
@@ -22,7 +25,6 @@ import {
   Toast,
   Tooltip,
 } from "@/components/ui";
-import { sampleSpeakers } from "@/lib/sample-speakers";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -145,21 +147,24 @@ export function Showcase() {
         </div>
       </Section>
 
-      <div className="ha-grid">
-        {sampleSpeakers.map((s) => (
-          <SpeakerCard
-            key={s.id}
-            href={`/speakers/${s.id}`}
-            brand={s.summary}
-            name={s.name}
-            price={s.price}
-            rating={s.rating}
-            notes={s.notes || undefined}
-            status={s.status}
-            statusLabel={s.statusLabel}
-          />
-        ))}
-      </div>
+      <Section title="Speaker card">
+        <div className="ha-speaker-grid" style={{ width: "100%" }}>
+          <SpeakerCard href="/speakers/ember-monitor" name="Ember Monitor" type="Bookshelf speaker, warm tuning" price="KES 18,000" rating={4.6} notes={12} />
+          <SpeakerCard href="/speakers/aria-studio" name="Aria Studio" type="Active monitor pair, bright and detailed" price="KES 24,000" rating={4.4} notes={7} status="due" statusLabel="Returns 3 Nov" />
+          <SpeakerCardSkeleton />
+        </div>
+      </Section>
+
+      <Section title="Empty and error">
+        <div style={{ width: "100%", display: "grid", gap: 24 }}>
+          <ErrorBanner title="We couldn't load the speakers." action={<Button variant="secondary">Retry</Button>}>
+            Check your connection and try again.
+          </ErrorBanner>
+          <MessagePanel icon={Speaker} title="Every speaker is rented right now." actions={<Button size="lg">Show all speakers</Button>}>
+            Turn off the filter to see when they return.
+          </MessagePanel>
+        </div>
+      </Section>
     </>
   );
 }
