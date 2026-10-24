@@ -77,3 +77,21 @@ Use the UI copy in `claude-design-prompt.md` verbatim; don't invent alternative 
 - Logos: use only `hearth-audio-icon-graphite.svg`, `-icon-ivory.svg`, `-symbol-on-light.svg`, `-symbol-on-dark.svg`. All other files in `logos/` are the retired warm direction. No wordmark exists: set "Hearth Audio" as text in Young Serif.
 - Voice: calm, exact, short sentences, no exclamation marks or emoji. Never use: cheap, hack, deal, bargain, gear-head.
 - Accessibility: WCAG AA contrast, status never by colour alone, visible focus on every interactive element, touch targets ≥ 44 px, body text ≥ 16 px, design at 390 px first (1 → 2 → 3 card columns at 768/1280).
+
+## Component-driven development
+
+Before building any feature or page:
+
+1. Read the design and spec docs for the feature's requirements and design tokens (`design.md` and `spec.md` in the generic rule; in this repo: `hearth-audio-spec.md`, `claude-design-prompt.md`, `brand-guide.md`, and the tokens in `app/styles/`).
+2. Search `components/` (and `components/ui/`) for existing components that cover each UI part the feature needs (buttons, forms, cards, tables, modals, nav, empty/loading/error states, etc.).
+3. Report a short checklist: which components EXIST and will be reused, and which are MISSING.
+4. Build every missing component first, as its own reusable component:
+   - one component per file, named in PascalCase, with typed props
+   - use only tokens from the design docs (colors, type, spacing, radius), never hard-coded values
+   - support mobile and desktop, plus loading, empty and error states where relevant
+   - prefer extending existing primitives in `components/ui/` over writing from scratch (shadcn/ui is not installed here; styling stays plain CSS, no Tailwind)
+5. Only after the components exist, compose the feature or page from them. Do not put one-off UI inline in a page if it could be a component.
+6. Never duplicate a component. If an existing one is close, extend it with props instead of creating a copy.
+7. After each component and each page: run `npm run build` and `npm run lint`, fix any errors, then commit with a clear message and push.
+
+Pause and show the missing-components list before building if more than 3 components are missing.
