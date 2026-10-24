@@ -7,11 +7,14 @@ import type { ReactNode } from "react";
 export function MessagePanel({
   icon,
   tone = "neutral",
+  role = "status",
   title,
   children,
   actions,
 }: {
   icon?: LucideIcon;
+  /** "alert" for failures, so screen readers announce them at once */
+  role?: "status" | "alert";
   /** "success" shows a green check unless `icon` is given */
   tone?: "neutral" | "success";
   title: string;
@@ -20,7 +23,7 @@ export function MessagePanel({
 }) {
   const Icon = icon ?? (tone === "success" ? CircleCheck : undefined);
   return (
-    <div role="status" className="ha-message">
+    <div role={role} className="ha-message">
       {Icon && (
         <span className={`ha-message__icon ha-message__icon--${tone}`}>
           <Icon size={40} strokeWidth={1.5} />

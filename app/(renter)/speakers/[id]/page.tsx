@@ -29,6 +29,11 @@ function BackLink() {
 
 const NOTES_SHOWN = 5;
 
+// Blocking route: the speaker lookup finishes before anything streams, so an unknown
+// id gets a real 404 status (a loading.tsx fallback would already have sent 200).
+// instant = false opts out of instant-navigation validation for this trade-off.
+export const instant = false;
+
 export default async function SpeakerPage({ params, searchParams }: PageProps<"/speakers/[id]">) {
   const [{ id }, query] = await Promise.all([params, searchParams]);
   const showAll = query.notes === "all";

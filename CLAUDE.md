@@ -19,6 +19,12 @@ Node is installed at `C:\Program Files\nodejs` but is not on the shell PATH; in 
 
 Next.js is v16 with `cacheComponents` and `partialPrefetching` on: read `node_modules/next/dist/docs/` before using an API from memory. Practical consequences: a route that reads `params`, `searchParams` or cookies (the Supabase session) needs a `loading.tsx` or `<Suspense>`, and client components calling `usePathname` must sit inside `<Suspense>` (see `components/shell/AppShell.tsx`). Session refresh lives in `proxy.ts` (Next 16's rename of `middleware.ts`).
 
+404 and error pages: `app/not-found.tsx` (unmatched URLs; adds the renter `AppShell` itself because only the root layout wraps it), `app/(renter)/not-found.tsx` and `app/admin/not-found.tsx` (for `notFound()` inside those areas — their layouts already supply the header, so they must not add another), `app/admin/[...rest]/page.tsx` (sends unmatched `/admin/*` URLs to the admin not-found instead of the renter one), `error.tsx` in both areas, and `app/global-error.tsx` (own `<html>`, fonts from `lib/fonts.ts`, full-reload link). Nested not-found files can't export `metadata`, so `NotFoundPanel` renders its own `<title>`. Next 16 error boundaries receive `retry` (re-fetches), not the older `reset`.
+
+`getSignedInUser` calls `await io()` (from `next/cache`) before Supabase's `getClaims`, which reads `Date.now()`; Next won't prerender clock reads. `io()` resolves at once in requests and server actions, but hangs during *every* prerender kind, including runtime prefetch (`prerender-runtime`, see `node_modules/next/dist/server/request/io.js`). So signed-in content (My rental, Swap, admin) is never part of a prefetch and streams in on navigation. That's accepted for now; don't add `io()` to public data paths, or Browse and Speaker pages lose prefetching too.
+
+Unknown-id routes (`/speakers/[id]`, `/admin/speakers/[id]`) are blocking (`export const instant = false`, no `loading.tsx`): the speaker lookup finishes before streaming starts, so `notFound()` returns a real 404 status. A loading fallback would already have sent 200.
+
 Server pages can't pass component props (e.g. a lucide `icon={Repeat}`) into a `"use client"` component — it fails at render with "Functions cannot be passed directly to Client Components". Components that take an icon prop and have no state (`MessagePanel`, `Button`) must stay out of `"use client"` files.
 
 ## Supabase
@@ -34,11 +40,11 @@ Server pages can't pass component props (e.g. a lucide `icon={Repeat}`) into a `
 
 ## Code layout
 
-- `app/styles/` — design tokens and `hearth.css` copied verbatim from the prototype's `_ds/` folder; `components.css` holds styles the prototype set inline; `shell.css` is the header/bottom-nav/layout. `app/globals.css` imports them in order. Fonts load via `next/font` in `app/layout.tsx` and feed `--font-heading` / `--font-body`.
+- `app/styles/` — design tokens and `hearth.css` copied verbatim from the prototype's `_ds/` folder; `components.css` holds styles the prototype set inline; `shell.css` is the header/bottom-nav/layout. `app/globals.css` imports them in order. Fonts load via `next/font` in `lib/fonts.ts` (shared by `app/layout.tsx` and `app/global-error.tsx`) and feed `--font-heading` / `--font-body`.
 - `components/ui/` — React ports of the prototype's design-system components (`_ds_bundle.js`), exported from `components/ui/index.ts`. Icons use `lucide-react` components (the prototype loaded Lucide from a CDN); pass the icon component, e.g. `iconStart={ArrowLeft}`.
 - `components/shell/` — `AppShell` (prototype `AppHeader` + `BottomNav`). Below 768px header links hide and the fixed bottom nav shows, in CSS only.
 - `lib/nav.ts` — renter and admin nav items and their active-path rules (desktop highlights My rental on `/swap`; mobile has a Swap tab). Client nav components take the nav by name because icon components can't cross the server→client boundary as props.
-- Routes: `app/(renter)/` (`/`, `/speakers/[id]`, `/rental`, `/swap`, internal `/design-system` showcase) and `app/admin/` (`/admin`, `/admin/speakers/new`, `/admin/returns`).
+- Routes: `app/(renter)/` (`/`, `/speakers/[id]`, `/rental`, `/swap`, internal `/design-system` showcase) and `app/admin/` (`/admin`, `/admin/speakers/new`, `/admin/speakers/[id]`, `/admin/returns`, plus the `[...rest]` catch-all). Each area has `not-found.tsx` and `error.tsx`; the root has `not-found.tsx` and `global-error.tsx`.
 - `lib/dates.ts` — rental dates are `YYYY-MM-DD` calendar days in Nairobi; `RENTAL_DAYS` (30), `addDays`, and fixed-name formatters (`formatDate` → "Sat 24 Oct 2026"). Don't format with `Intl` month names: ICU versions differ ("Sep" vs "Sept").
 - Speaker page (`app/(renter)/speakers/[id]/` + `components/speaker/RentAction.tsx`): "Rent for a month" opens the sign-in sheet first when signed out, then the booking sheet, which calls the `bookSpeaker` server action.
 - `components/account/` — `SignInSheet` (sign in / create account; there is no sign-in page), `AccountAction` (header), `SignInButton`.

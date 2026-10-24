@@ -29,6 +29,9 @@
   .ha-main{padding:var(--space-8) var(--gutter) var(--space-9);}
 }
 
+/* global-error: no header or bottom nav, so no space reserved for them */
+.ha-global-error{max-width:var(--container-max);margin:0 auto;padding:var(--space-7) var(--space-4);}
+
 .ha-visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;margin:-1px;}
 
 /* Browse speakers (prototype Browse.dc.html) */

@@ -1,0 +1,7 @@
+"use client"; // Error boundaries must be Client Components
+
+import { ErrorPanel } from "@/components/shell/ErrorPanel";
+
+export default function RenterError({ error, retry }: { error: unknown; retry: () => void }) {
+  return <ErrorPanel error={error} retry={retry} />;
+}

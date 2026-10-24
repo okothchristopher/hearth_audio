@@ -8,31 +8,35 @@ import { getSpeaker, type Speaker } from "@/lib/speakers";
 
 export const metadata = { title: "Edit speaker" };
 
-export default function EditSpeakerPage({ params }: PageProps<"/admin/speakers/[id]">) {
-  return (
-    <div className="ha-admin">
-      <Suspense fallback={<AdminSpeakerListSkeleton />}>
-        <AdminGate>
-          <EditContent params={params} />
-        </AdminGate>
-      </Suspense>
-    </div>
-  );
-}
+// Blocking route: the speaker lookup (public data) finishes before anything streams,
+// so an unknown id gets a real 404 status. Only the admin check and form stream in.
+export const instant = false;
 
-async function EditContent({ params }: { params: PageProps<"/admin/speakers/[id]">["params"] }) {
+export default async function EditSpeakerPage({ params }: PageProps<"/admin/speakers/[id]">) {
   const { id } = await params;
+
   let speaker: Speaker | undefined;
   try {
     speaker = await getSpeaker(id);
   } catch {
     return (
-      <ErrorBanner title="We couldn't load this speaker." action={<RetryButton />}>
-        Check your connection and try again.
-      </ErrorBanner>
+      <div className="ha-admin">
+        <ErrorBanner title="We couldn't load this speaker." action={<RetryButton />}>
+          Check your connection and try again.
+        </ErrorBanner>
+      </div>
     );
   }
   if (!speaker) notFound();
-  // key: a fresh form when moving between speakers
-  return <SpeakerForm key={speaker.id} speaker={speaker} />;
+
+  return (
+    <div className="ha-admin">
+      <Suspense fallback={<AdminSpeakerListSkeleton />}>
+        <AdminGate>
+          {/* key: a fresh form when moving between speakers */}
+          <SpeakerForm key={speaker.id} speaker={speaker} />
+        </AdminGate>
+      </Suspense>
+    </div>
+  );
 }
