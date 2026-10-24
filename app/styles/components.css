@@ -80,3 +80,7 @@
 .ha-toast__icon--error{color:#E8857F;}
 .ha-toast__icon--info{color:var(--color-champagne);}
 .ha-toast__close{background:none;border:0;color:inherit;cursor:pointer;padding:4px;display:inline-flex;opacity:.7;}
+
+/* Sign-in sheet */
+.ha-signin{display:flex;flex-direction:column;gap:16px;margin-top:4px;}
+.ha-signin__context{color:var(--text-muted);}

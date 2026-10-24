@@ -1,7 +1,7 @@
 import { Speaker } from "lucide-react";
 import Link from "next/link";
 import { Button, ErrorBanner, MessagePanel, RetryButton, SpeakerCard, SpeakerCardSkeleton } from "@/components/ui";
-import { formatKes, getSpeakers, statusLabel, type Speaker as SpeakerData } from "@/lib/speakers";
+import { chipStatus, formatKes, getSpeakers, statusLabel, type Speaker as SpeakerData } from "@/lib/speakers";
 
 function FilterBar({ availableOnly, count }: { availableOnly: boolean; count?: string }) {
   return (
@@ -65,7 +65,7 @@ export async function SpeakerList({ searchParams }: { searchParams: PageProps<"/
                 price={formatKes(s.pricePerMonth)}
                 rating={s.rating}
                 notes={s.noteCount}
-                status={s.status === "available" ? "available" : "due"}
+                status={chipStatus(s)}
                 statusLabel={statusLabel(s)}
               />
             </li>

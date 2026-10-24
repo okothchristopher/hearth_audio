@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Hearth Audio is a mobile-first web app for renting a high-end speaker in Kenya for a month, swapping it, and writing listening notes. Product context: [hearth-audio-spec.md](hearth-audio-spec.md).
 
-Current state: the design system, app shell and navigation are built; every screen is still a `Placeholder`. Supabase is not wired up yet. Remote: `https://github.com/okothchristopher/hearth_audio` (branch `main`).
+Current state: Browse, Speaker page + booking, and My rental are built on Supabase (auth, booking, listening notes). Swap and the admin screens are still `Placeholder`s, and admin routes are not yet restricted to admins. Remote: `https://github.com/okothchristopher/hearth_audio` (branch `main`).
 
 ## Commands
 
@@ -17,7 +17,16 @@ Node is installed at `C:\Program Files\nodejs` but is not on the shell PATH; in 
 - `npm run lint` — ESLint
 - No test runner is set up yet.
 
-Next.js is v16 with `cacheComponents` and `partialPrefetching` on: read `node_modules/next/dist/docs/` before using an API from memory. Practical consequences: a route that reads `params` needs a `loading.tsx` (or `<Suspense>`) and `generateStaticParams` where possible, and client components calling `usePathname` must sit inside `<Suspense>` (see `components/shell/AppShell.tsx`).
+Next.js is v16 with `cacheComponents` and `partialPrefetching` on: read `node_modules/next/dist/docs/` before using an API from memory. Practical consequences: a route that reads `params`, `searchParams` or cookies (the Supabase session) needs a `loading.tsx` or `<Suspense>`, and client components calling `usePathname` must sit inside `<Suspense>` (see `components/shell/AppShell.tsx`). Session refresh lives in `proxy.ts` (Next 16's rename of `middleware.ts`).
+
+## Supabase
+
+- Env: `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in `.env` / `.env.local` (template: `.env.example`). No secret key is used.
+- Schema lives in `supabase/migrations/` and sample content in `supabase/seed.sql`; both are run by hand in the Supabase SQL Editor (no CLI). Add schema changes as a new numbered migration file, never by editing an applied one.
+- Clients (`lib/supabase/`): `publicClient` for public reads (no cookies, keeps Browse and Speaker pages fast); `createUserClient()` + `getSignedInUser()` for anything acting as the user (server actions, My rental); `browserClient()` / `useUser()` in client components for sign-in state.
+- Writes go through server actions in `app/(renter)/actions.ts` and rely on row-level security, not app checks: renters insert only their own rentals and notes, a note needs a rental of that speaker, and overlapping bookings fail with SQLSTATE `23P01` (mapped to the prompt's "Someone just booked this speaker" copy).
+- Triggers do bookkeeping the client can't be trusted with: a `people` row on sign-up, speaker `status` from active rentals, and note `author_name`/`author_area` copied from `people` (people rows are private, notes are public).
+- Make an admin with `update public.people set role = 'admin' where email = '…';` in the SQL Editor.
 
 ## Code layout
 
@@ -27,8 +36,9 @@ Next.js is v16 with `cacheComponents` and `partialPrefetching` on: read `node_mo
 - `lib/nav.ts` — renter and admin nav items and their active-path rules (desktop highlights My rental on `/swap`; mobile has a Swap tab). Client nav components take the nav by name because icon components can't cross the server→client boundary as props.
 - Routes: `app/(renter)/` (`/`, `/speakers/[id]`, `/rental`, `/swap`, internal `/design-system` showcase) and `app/admin/` (`/admin`, `/admin/speakers/new`, `/admin/returns`).
 - `lib/dates.ts` — rental dates are `YYYY-MM-DD` calendar days in Nairobi; `RENTAL_DAYS` (30), `addDays`, and fixed-name formatters (`formatDate` → "Sat 24 Oct 2026"). Don't format with `Intl` month names: ICU versions differ ("Sep" vs "Sept").
-- Speaker page (`app/(renter)/speakers/[id]/` + `components/speaker/RentAction.tsx`): the booking sheet is UI only — "Confirm booking" stays disabled until Supabase stores accounts and rentals, and the sign-in sheet isn't built.
-- `lib/speakers.ts` — speaker data access (`getSpeakers`, `getSpeaker`, `getListeningNotes`) plus KES and status-chip formatting. Returns placeholder content from `claude-design-prompt.md` until Supabase is wired up; swap the implementation there, not in callers.
+- Speaker page (`app/(renter)/speakers/[id]/` + `components/speaker/RentAction.tsx`): "Rent for a month" opens the sign-in sheet first when signed out, then the booking sheet, which calls the `bookSpeaker` server action.
+- `components/account/` — `SignInSheet` (sign in / create account; there is no sign-in page), `AccountAction` (header), `SignInButton`.
+- `lib/speakers.ts` / `lib/rentals.ts` — data access plus KES and status-chip formatting. Pages call these, never Supabase directly.
 - Browse (`app/(renter)/page.tsx` + `components/browse/`) keeps the Available-now filter in the URL (`?filter=available`) and reads it inside `<Suspense>`, whose fallback is the loading skeleton.
 
 ## Stack
@@ -42,8 +52,8 @@ Next.js is v16 with `cacheComponents` and `partialPrefetching` on: read `node_mo
 | Double-booking | Postgres exclusion constraint on rental `daterange` per speaker | Source of the "Someone just booked this speaker" error — don't rely on app-side checks |
 | Files | Supabase Storage | Speaker photos |
 | Styling | Plain CSS + CSS Modules, using `tokens/*.css` and `components/hearth.css` from the prototype zip's `_ds/` folder | No Tailwind |
-| Validation | zod, shared by client and server actions | |
-| Dates | date-fns with `Africa/Nairobi` timezone | |
+| Validation | Plain checks in the form and again in the server action; the database constraints are the final word | |
+| Dates | `lib/dates.ts` (no date library), `Africa/Nairobi` calendar days | |
 | Hosting | Vercel, functions pinned to the same region as Supabase (Frankfurt / eu-central) | Supabase has no Africa region |
 
 Deliberately excluded for now: payments (M-Pesa Daraja later), SMS (Africa's Talking later), global state libraries, native apps.

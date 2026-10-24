@@ -1,10 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
+import { bookSpeaker, type BookingResult } from "@/app/(renter)/actions";
+import { SignInSheet } from "@/components/account/SignInSheet";
 import { Button, Dialog, TextField } from "@/components/ui";
-import { RENTAL_DAYS, addDays, formatDate, todayInNairobi } from "@/lib/dates";
+import { RENTAL_DAYS, addDays, formatDate, formatShortDate, todayInNairobi } from "@/lib/dates";
+import { useUser } from "@/lib/supabase/client";
 
 type Props = {
+  speakerId: string;
   speakerName: string;
   /** Pre-formatted, e.g. "KES 18,000" */
   price: string;
@@ -14,10 +19,16 @@ type Props = {
   layout: "aside" | "bar";
 };
 
-export function RentAction({ speakerName, price, unavailableLabel, layout }: Props) {
-  const [open, setOpen] = useState(false);
+export function RentAction({ speakerId, speakerName, price, unavailableLabel, layout }: Props) {
+  const user = useUser();
+  const [sheet, setSheet] = useState<"signin" | "booking" | null>(null);
   const button = (
-    <Button size="lg" block={layout === "aside"} disabled={!!unavailableLabel} onClick={() => setOpen(true)}>
+    <Button
+      size="lg"
+      block={layout === "aside"}
+      disabled={!!unavailableLabel}
+      onClick={() => setSheet(user ? "booking" : "signin")}
+    >
       {unavailableLabel ?? "Rent for a month"}
     </Button>
   );
@@ -38,15 +49,73 @@ export function RentAction({ speakerName, price, unavailableLabel, layout }: Pro
           {button}
         </div>
       )}
-      {open && <BookingSheet speakerName={speakerName} price={price} onClose={() => setOpen(false)} />}
+      {sheet === "signin" && (
+        <SignInSheet
+          context={`Sign in to rent the ${speakerName}.`}
+          onClose={() => setSheet(null)}
+          onSignedIn={() => setSheet("booking")}
+        />
+      )}
+      {sheet === "booking" && (
+        <BookingSheet
+          speakerId={speakerId}
+          speakerName={speakerName}
+          price={price}
+          onClose={() => setSheet(null)}
+          onNeedsSignIn={() => setSheet("signin")}
+        />
+      )}
     </>
   );
 }
 
-function BookingSheet({ speakerName, price, onClose }: { speakerName: string; price: string; onClose: () => void }) {
+function BookingSheet({
+  speakerId,
+  speakerName,
+  price,
+  onClose,
+  onNeedsSignIn,
+}: {
+  speakerId: string;
+  speakerName: string;
+  price: string;
+  onClose: () => void;
+  onNeedsSignIn: () => void;
+}) {
+  const router = useRouter();
   const today = todayInNairobi();
   const [start, setStart] = useState(today);
+  const [result, setResult] = useState<BookingResult>();
+  const [pending, startTransition] = useTransition();
   const valid = /^\d{4}-\d{2}-\d{2}$/.test(start) && start >= today;
+
+  const confirm = () =>
+    startTransition(async () => {
+      const r = await bookSpeaker(speakerId, start);
+      if (!r.ok && r.reason === "signin") return onNeedsSignIn();
+      setResult(r);
+      if (r.ok) router.refresh(); // status chips and My rental
+    });
+
+  if (result?.ok) {
+    return (
+      <Dialog
+        sheet
+        title="Booked."
+        onClose={onClose}
+        actions={
+          <Button href="/rental" onClick={onClose}>
+            View my rental
+          </Button>
+        }
+      >
+        <p role="status">
+          {speakerName} is reserved from {formatShortDate(result.startDate)} to {formatShortDate(result.returnDate)}.
+          {" "}We&apos;ll message you to arrange delivery.
+        </p>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog
@@ -58,9 +127,8 @@ function BookingSheet({ speakerName, price, onClose }: { speakerName: string; pr
           <Button variant="ghost" onClick={onClose}>
             Cancel
           </Button>
-          {/* Enabled once accounts and rentals are stored in Supabase */}
-          <Button disabled aria-describedby="booking-unavailable">
-            Confirm booking
+          <Button disabled={!valid || pending} onClick={confirm}>
+            {pending ? "Booking" : "Confirm booking"}
           </Button>
         </>
       }
@@ -71,7 +139,10 @@ function BookingSheet({ speakerName, price, onClose }: { speakerName: string; pr
           type="date"
           min={today}
           value={start}
-          onChange={(e) => setStart(e.currentTarget.value)}
+          onChange={(e) => {
+            setStart(e.currentTarget.value);
+            setResult(undefined);
+          }}
           hint="We deliver on this day."
           error={valid ? undefined : "Choose today or a later date."}
         />
@@ -93,10 +164,12 @@ function BookingSheet({ speakerName, price, onClose }: { speakerName: string; pr
             <dd>{price}</dd>
           </div>
         </dl>
+        {result && !result.ok && (
+          <p role="alert" className="ha-field__error">
+            {result.message}
+          </p>
+        )}
         <p className="ha-small ha-booking__note">After you book, we message you to arrange delivery and send payment details.</p>
-        <p id="booking-unavailable" className="ha-small ha-booking__note">
-          Booking is not available yet.
-        </p>
       </div>
     </Dialog>
   );

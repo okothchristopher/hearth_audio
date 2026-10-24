@@ -8,6 +8,11 @@ export function todayInNairobi() {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Nairobi" }).format(new Date());
 }
 
+/** A timestamp's calendar date in Nairobi as "YYYY-MM-DD" */
+export function toNairobiDate(timestamp: string) {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Nairobi" }).format(new Date(timestamp));
+}
+
 export function addDays(isoDate: string, days: number) {
   const d = new Date(`${isoDate}T00:00:00Z`);
   d.setUTCDate(d.getUTCDate() + days);
@@ -27,6 +32,12 @@ function parts(isoDate: string) {
 export function formatDate(isoDate: string) {
   const p = parts(isoDate);
   return `${p.wd} ${p.day} ${p.mon} ${p.year}`;
+}
+
+/** "Sat 24 Oct" */
+export function formatShortDate(isoDate: string) {
+  const p = parts(isoDate);
+  return `${p.wd} ${p.day} ${p.mon}`;
 }
 
 /** "12 Oct 2026" */

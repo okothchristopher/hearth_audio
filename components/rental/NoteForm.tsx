@@ -1,17 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
+import { saveNote } from "@/app/(renter)/actions";
 import { Button, StarRating, TextField } from "@/components/ui";
 
 const MIN_CHARS = 20;
 
-export function NoteForm() {
+export function NoteForm({ speakerId, speakerName }: { speakerId: string; speakerName: string }) {
+  const router = useRouter();
   const [stars, setStars] = useState(0);
   const [text, setText] = useState("");
   const [touched, setTouched] = useState(false);
+  const [saveError, setSaveError] = useState<string>();
+  const [saved, setSaved] = useState(false);
+  const [pending, startTransition] = useTransition();
 
   const starError = touched && stars === 0 ? "Choose a star rating." : undefined;
   const textError = touched && text.trim().length < MIN_CHARS ? "Write at least 20 characters." : undefined;
+
+  if (saved) {
+    return (
+      <p role="status" className="ha-rental__noted">
+        Thank you. Your note is now on the {speakerName} page.
+      </p>
+    );
+  }
 
   return (
     <form
@@ -20,6 +34,14 @@ export function NoteForm() {
       onSubmit={(e) => {
         e.preventDefault();
         setTouched(true);
+        if (stars === 0 || text.trim().length < MIN_CHARS) return;
+        setSaveError(undefined);
+        startTransition(async () => {
+          const r = await saveNote(speakerId, stars, text);
+          if (!r.ok) return setSaveError(r.message); // text stays in the form
+          setSaved(true);
+          router.refresh(); // past rentals switch to "Note written"
+        });
       }}
     >
       <div className="ha-field">
@@ -44,9 +66,14 @@ export function NoteForm() {
         onBlur={() => text && setTouched(true)}
       />
       <div className="ha-note-form__actions">
-        {/* ponytail: validates only; saving needs Supabase (accounts + listening_notes) */}
-        <Button type="submit">Submit note</Button>
-        <p className="ha-small ha-note-form__soon">{"Notes can't be saved yet. Your text stays here."}</p>
+        <Button type="submit" disabled={pending}>
+          {pending ? "Submitting" : "Submit note"}
+        </Button>
+        {saveError && (
+          <p role="alert" className="ha-field__error">
+            {saveError}
+          </p>
+        )}
       </div>
     </form>
   );

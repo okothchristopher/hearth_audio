@@ -4,21 +4,17 @@ import { RentAction } from "@/components/speaker/RentAction";
 import { Button, ErrorBanner, ListeningNote, RetryButton, SpeakerPhoto, StarRating, StatusChip } from "@/components/ui";
 import { formatDay, formatDayMonth } from "@/lib/dates";
 import {
+  chipStatus,
   formatKes,
   getListeningNotes,
   getSpeaker,
-  getSpeakers,
   statusLabel,
   type ListeningNote as Note,
   type Speaker,
 } from "@/lib/speakers";
 
-export async function generateStaticParams() {
-  return (await getSpeakers()).map(({ id }) => ({ id }));
-}
-
 export async function generateMetadata({ params }: PageProps<"/speakers/[id]">) {
-  const speaker = await getSpeaker((await params).id);
+  const speaker = await getSpeaker((await params).id).catch(() => undefined);
   return { title: speaker?.name ?? "Speaker" };
 }
 
@@ -67,7 +63,7 @@ export default async function SpeakerPage({ params }: PageProps<"/speakers/[id]"
         </div>
 
         <div className="ha-speaker__summary">
-          <StatusChip status={rented ? "due" : "available"}>{statusLabel(speaker)}</StatusChip>
+          <StatusChip status={chipStatus(speaker)}>{statusLabel(speaker)}</StatusChip>
           <div className="ha-speaker__title">
             <h1>{speaker.name}</h1>
             <p className="ha-speaker__type">{speaker.type}</p>
@@ -81,7 +77,7 @@ export default async function SpeakerPage({ params }: PageProps<"/speakers/[id]"
           </p>
           <p className="ha-speaker__description">{speaker.description}</p>
           <div className="ha-speaker__aside-action">
-            <RentAction layout="aside" speakerName={speaker.name} price={price} unavailableLabel={unavailableLabel} />
+            <RentAction layout="aside" speakerId={speaker.id} speakerName={speaker.name} price={price} unavailableLabel={unavailableLabel} />
           </div>
         </div>
 
@@ -119,7 +115,7 @@ export default async function SpeakerPage({ params }: PageProps<"/speakers/[id]"
           </h2>
           {notes.length > 0 ? (
             notes.map((n) => (
-              <ListeningNote key={`${n.author}-${n.date}`} author={n.author} area={n.area} date={formatDay(n.date)} stars={n.stars}>
+              <ListeningNote key={n.id} author={n.author} area={n.area} date={formatDay(n.date)} stars={n.stars}>
                 {n.text}
               </ListeningNote>
             ))
@@ -130,7 +126,7 @@ export default async function SpeakerPage({ params }: PageProps<"/speakers/[id]"
       </div>
 
       <div className="ha-speaker__bar-action">
-        <RentAction layout="bar" speakerName={speaker.name} price={price} unavailableLabel={unavailableLabel} />
+        <RentAction layout="bar" speakerId={speaker.id} speakerName={speaker.name} price={price} unavailableLabel={unavailableLabel} />
       </div>
     </div>
   );
