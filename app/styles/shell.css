@@ -48,8 +48,3 @@
   .ha-browse__lead{font-size:var(--type-lead-size);line-height:var(--type-lead-lh);}
 }
 
-/* Placeholder page */
-.ha-placeholder{display:grid;gap:var(--space-5);max-width:var(--measure);}
-.ha-placeholder__eyebrow{color:var(--text-muted);}
-.ha-placeholder__note{padding:var(--space-5);border:1px dashed var(--color-line-strong);border-radius:var(--radius-md);color:var(--text-muted);}
-.ha-placeholder__links{display:flex;flex-wrap:wrap;gap:12px;}

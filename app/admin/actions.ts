@@ -110,3 +110,16 @@ export async function saveSpeaker(input: SpeakerInput): Promise<SaveSpeakerResul
   if (error) return failed(error);
   return { ok: true, id, name: row.name, status: row.status };
 }
+
+/** The speaker is back: closes the rental, and a database trigger marks the speaker available. */
+export async function markReturned(rentalId: string): Promise<AdminResult> {
+  const ctx = await getAdminContext();
+  if (ctx.status !== "admin") return DENIED;
+
+  const { error } = await ctx.supabase.from("rentals").update({ returned_at: new Date().toISOString() }).eq("id", rentalId);
+  if (error) {
+    console.error("markReturned", error);
+    return { ok: false, message: "It wasn't marked returned. Try again." };
+  }
+  return { ok: true };
+}

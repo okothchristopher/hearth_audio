@@ -34,6 +34,18 @@ export function formatDate(isoDate: string) {
   return `${p.wd} ${p.day} ${p.mon} ${p.year}`;
 }
 
+const WEEKDAYS_LONG = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+/** "Friday" */
+export function formatWeekday(isoDate: string) {
+  return WEEKDAYS_LONG[new Date(`${isoDate}T00:00:00Z`).getUTCDay()];
+}
+
+/** Whole days from one "YYYY-MM-DD" to another; negative when `to` is earlier. */
+export function daysBetween(from: string, to: string) {
+  return Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86_400_000);
+}
+
 /** "Sat 24 Oct" */
 export function formatShortDate(isoDate: string) {
   const p = parts(isoDate);
