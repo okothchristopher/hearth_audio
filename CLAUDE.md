@@ -49,6 +49,7 @@ Server pages can't pass component props (e.g. a lucide `icon={Repeat}`) into a `
 - Speaker page (`app/(renter)/speakers/[id]/` + `components/speaker/RentAction.tsx`): "Rent for a month" opens the sign-in sheet first when signed out, then the booking sheet, which calls the `bookSpeaker` server action.
 - `components/account/` — `SignInSheet` (sign in / create account; there is no sign-in page), `AccountAction` (header), `SignInButton`.
 - `lib/speakers.ts` / `lib/rentals.ts` — data access plus KES and status-chip formatting. Pages call these, never Supabase directly.
+- Landing page = Browse: hero, `components/landing/HowItWorks.tsx`, then the speaker list. Location and phone live only in `lib/contact.ts` and render in `components/shell/SiteFooter.tsx`, which the renter layout passes to `AppShell` as `footer`. With a footer, the footer (not `<main>`) reserves the mobile bottom-nav and Rent-bar space (`app/styles/landing.css`).
 - Browse (`app/(renter)/page.tsx` + `components/browse/`) keeps the Available-now filter in the URL (`?filter=available`) and reads it inside `<Suspense>`, whose fallback is the loading skeleton.
 
 ## Stack

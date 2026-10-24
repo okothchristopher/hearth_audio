@@ -20,12 +20,15 @@ export function AppShell({
   homeHref,
   user,
   action,
+  footer,
   children,
 }: {
   nav: NavName;
   homeHref: string;
   user?: string;
   action?: ReactNode;
+  /** Rendered after <main>; it then reserves the mobile bottom-nav space instead of main */
+  footer?: ReactNode;
   children: ReactNode;
 }) {
   return (
@@ -47,9 +50,10 @@ export function AppShell({
           {action}
         </div>
       </header>
-      <main id="main" className="ha-main">
+      <main id="main" className={`ha-main${footer ? " ha-main--with-footer" : ""}`}>
         {children}
       </main>
+      {footer}
       <nav aria-label="Main" className="ha-bottom-nav">
         <Suspense fallback={<Static items={NAVS[nav].bottom} className="ha-bottom-nav__item" />}>
           <BottomLinks nav={nav} />

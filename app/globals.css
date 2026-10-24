@@ -13,5 +13,6 @@
 @import "./styles/rental.css";
 @import "./styles/swap.css";
 @import "./styles/admin.css";
+@import "./styles/landing.css";
 
 *, *::before, *::after { box-sizing: border-box; }
