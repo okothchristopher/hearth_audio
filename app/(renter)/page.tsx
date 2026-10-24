@@ -1,16 +1,18 @@
-import { Placeholder } from "@/components/shell/Placeholder";
-import { Button } from "@/components/ui";
-import { sampleSpeakers } from "@/lib/sample-speakers";
+import { Suspense } from "react";
+import { SpeakerList, SpeakerListSkeleton } from "@/components/browse/SpeakerList";
 
-export default function BrowsePage() {
+export default function BrowsePage({ searchParams }: PageProps<"/">) {
   return (
-    <Placeholder eyebrow="Browse speakers" title="Hear a different speaker at home every month." lead="Speaker cards, the Available now filter and the active rental banner go here.">
-      <Button href={`/speakers/${sampleSpeakers[0].id}`} variant="secondary">
-        Open a speaker page
-      </Button>
-      <Button href="/design-system" variant="ghost">
-        View the design system
-      </Button>
-    </Placeholder>
+    <div className="ha-browse">
+      <section className="ha-browse__hero">
+        <h1 className="ha-display">Hear a different speaker at home every month.</h1>
+        <p className="ha-browse__lead">
+          Rent a premium speaker for thirty days. Listen at home, then write down what you heard.
+        </p>
+      </section>
+      <Suspense fallback={<SpeakerListSkeleton />}>
+        <SpeakerList searchParams={searchParams} />
+      </Suspense>
+    </div>
   );
 }
