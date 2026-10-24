@@ -1,0 +1,32 @@
+/* My rental (prototype MyRental.dc.html). Mobile first. */
+
+.ha-rental{display:flex;flex-direction:column;gap:40px;max-width:720px;}
+.ha-rental__h2{font-size:24px;line-height:1.2;margin-bottom:16px;}
+.ha-rental__swap{align-self:flex-start;}
+
+.ha-current{display:flex;flex-direction:column;gap:20px;}
+.ha-current__photo{margin:0 -16px;}
+.ha-current__photo .ha-photo{aspect-ratio:16 / 10 !important;}
+.ha-current__body{display:flex;flex-direction:column;gap:16px;}
+.ha-current__name{font-size:28px;line-height:1.15;}
+.ha-current__left{font-family:var(--font-heading);font-size:24px;line-height:1.2;}
+
+.ha-progress{appearance:none;-webkit-appearance:none;width:100%;height:8px;border:0;border-radius:999px;overflow:hidden;background:var(--color-surface-sunken);}
+.ha-progress::-webkit-progress-bar{background:var(--color-surface-sunken);}
+.ha-progress::-webkit-progress-value{background:var(--color-accent);border-radius:999px;}
+.ha-progress::-moz-progress-bar{background:var(--color-accent);border-radius:999px;}
+
+.ha-note-form{display:flex;flex-direction:column;gap:20px;}
+.ha-note-form__actions{display:flex;flex-direction:column;align-items:flex-start;gap:12px;}
+.ha-note-form__soon{color:var(--text-muted);}
+
+.ha-past{list-style:none;margin:0;padding:0;border-bottom:1px solid var(--color-line);}
+.ha-past__row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 0;border-top:1px solid var(--color-line);}
+.ha-past__name{font-weight:500;}
+.ha-past__dates{color:var(--text-muted);font-variant-numeric:tabular-nums;}
+
+@media (min-width:768px){
+  .ha-current{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:40px;align-items:start;}
+  .ha-current__photo{margin:0;border-radius:var(--radius-md);overflow:hidden;}
+  .ha-current__photo .ha-photo{aspect-ratio:4 / 5 !important;}
+}
