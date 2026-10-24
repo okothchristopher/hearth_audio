@@ -16,8 +16,12 @@ type Common = {
 };
 
 type Props =
-  | (Common & { href: string } & Omit<ComponentProps<typeof Link>, "href" | "className" | "children">)
-  | (Common & { href?: undefined } & Omit<ComponentProps<"button">, "className" | "children">);
+  | (Common & {
+      href: string;
+      /** Full page load (plain <a>) instead of client navigation, e.g. from global-error */
+      reload?: boolean;
+    } & Omit<ComponentProps<typeof Link>, "href" | "className" | "children">)
+  | (Common & { href?: undefined; reload?: undefined } & Omit<ComponentProps<"button">, "className" | "children">);
 
 export function Button({
   variant = "primary",
@@ -27,6 +31,7 @@ export function Button({
   iconEnd: End,
   children,
   className = "",
+  reload = false,
   ...rest
 }: Props) {
   const cls = `ha-btn ha-btn--${variant} ha-btn--${size}${block ? " ha-btn--block" : ""} ${className}`;
@@ -38,6 +43,13 @@ export function Button({
       {End && <End size={is} />}
     </>
   );
+  if (rest.href !== undefined && reload) {
+    return (
+      <a className={cls} href={rest.href}>
+        {inner}
+      </a>
+    );
+  }
   if (rest.href !== undefined) {
     return (
       <Link className={cls} {...rest}>
