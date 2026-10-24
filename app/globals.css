@@ -14,5 +14,6 @@
 @import "./styles/swap.css";
 @import "./styles/admin.css";
 @import "./styles/landing.css";
+@import "./styles/chat.css";
 
 *, *::before, *::after { box-sizing: border-box; }
