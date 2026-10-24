@@ -26,7 +26,9 @@ Next.js is v16 with `cacheComponents` and `partialPrefetching` on: read `node_mo
 - `components/shell/` — `AppShell` (prototype `AppHeader` + `BottomNav`). Below 768px header links hide and the fixed bottom nav shows, in CSS only.
 - `lib/nav.ts` — renter and admin nav items and their active-path rules (desktop highlights My rental on `/swap`; mobile has a Swap tab). Client nav components take the nav by name because icon components can't cross the server→client boundary as props.
 - Routes: `app/(renter)/` (`/`, `/speakers/[id]`, `/rental`, `/swap`, internal `/design-system` showcase) and `app/admin/` (`/admin`, `/admin/speakers/new`, `/admin/returns`).
-- `lib/speakers.ts` — speaker data access (`getSpeakers`, `getSpeaker`) plus KES and status-chip formatting. Returns placeholder content from `claude-design-prompt.md` until Supabase is wired up; swap the implementation there, not in callers.
+- `lib/dates.ts` — rental dates are `YYYY-MM-DD` calendar days in Nairobi; `RENTAL_DAYS` (30), `addDays`, and fixed-name formatters (`formatDate` → "Sat 24 Oct 2026"). Don't format with `Intl` month names: ICU versions differ ("Sep" vs "Sept").
+- Speaker page (`app/(renter)/speakers/[id]/` + `components/speaker/RentAction.tsx`): the booking sheet is UI only — "Confirm booking" stays disabled until Supabase stores accounts and rentals, and the sign-in sheet isn't built.
+- `lib/speakers.ts` — speaker data access (`getSpeakers`, `getSpeaker`, `getListeningNotes`) plus KES and status-chip formatting. Returns placeholder content from `claude-design-prompt.md` until Supabase is wired up; swap the implementation there, not in callers.
 - Browse (`app/(renter)/page.tsx` + `components/browse/`) keeps the Available-now filter in the URL (`?filter=available`) and reads it inside `<Suspense>`, whose fallback is the loading skeleton.
 
 ## Stack

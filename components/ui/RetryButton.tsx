@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
-import { Button } from "@/components/ui";
+import { Button } from "./Button";
 
 export function RetryButton() {
   const router = useRouter();

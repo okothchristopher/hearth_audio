@@ -1,8 +1,7 @@
 import { Speaker } from "lucide-react";
 import Link from "next/link";
-import { Button, ErrorBanner, MessagePanel, SpeakerCard, SpeakerCardSkeleton } from "@/components/ui";
+import { Button, ErrorBanner, MessagePanel, RetryButton, SpeakerCard, SpeakerCardSkeleton } from "@/components/ui";
 import { formatKes, getSpeakers, statusLabel, type Speaker as SpeakerData } from "@/lib/speakers";
-import { RetryButton } from "./RetryButton";
 
 function FilterBar({ availableOnly, count }: { availableOnly: boolean; count?: string }) {
   return (

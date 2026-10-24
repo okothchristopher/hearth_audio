@@ -63,6 +63,12 @@
 
 .ha-dialog-scrim{position:fixed;inset:0;background:var(--color-scrim);display:flex;align-items:center;justify-content:center;padding:24px;z-index:100;animation:ha-fade var(--dur-base) var(--ease-standard);}
 .ha-dialog{position:relative;width:100%;background:var(--color-surface);border-radius:var(--radius-md);box-shadow:var(--shadow-overlay);padding:32px;font-family:var(--font-body);animation:ha-fade-up var(--dur-slow) var(--ease-standard);}
+.ha-dialog:focus{outline:none;}
+@media (max-width:767px){
+  .ha-dialog-scrim--sheet{align-items:flex-end;padding:0;}
+  .ha-dialog-scrim--sheet .ha-dialog{max-width:none !important;border-radius:var(--radius-lg) var(--radius-lg) 0 0;padding:28px 24px calc(24px + env(safe-area-inset-bottom));max-height:90vh;overflow-y:auto;}
+  .ha-dialog-scrim--sheet .ha-dialog__actions > *{flex:1;}
+}
 .ha-dialog__close{position:absolute;top:16px;right:16px;}
 .ha-dialog__title{font-size:24px;line-height:1.2;margin:0 32px 12px 0;}
 .ha-dialog__body{font-size:16px;line-height:1.6;color:var(--color-text);}

@@ -6,3 +6,4 @@ export { StarRating } from "./StarRating";
 export { StatusChip, Toast, Tooltip, Dialog, MessagePanel, ErrorBanner, type Status } from "./feedback";
 export { TextField, Select, Checkbox, Radio, Switch } from "./forms";
 export { FilterTag, Tabs } from "./navigation";
+export { RetryButton } from "./RetryButton";

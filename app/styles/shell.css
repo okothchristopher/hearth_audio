@@ -1,6 +1,9 @@
 /* App shell: AppHeader + BottomNav from the prototype. Below 768px the header
    keeps only the logo and action; navigation moves to the fixed bottom bar. */
 
+/* 1px border + 60px items + 12px padding; fixed bars on mobile sit above this */
+:root{--bottom-nav-h:calc(73px + env(safe-area-inset-bottom));}
+
 .ha-skip-link{position:absolute;left:16px;top:-48px;z-index:20;padding:10px 14px;background:var(--color-graphite);color:var(--color-ivory);border-radius:var(--radius-sm);font-family:var(--font-body);font-weight:600;text-decoration:none;}
 .ha-skip-link:focus{top:12px;color:var(--color-ivory);}
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, CircleAlert, Info, X, type LucideIcon } from "lucide-react";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { IconButton } from "./Button";
 
 export type Status = "available" | "due" | "overdue" | "rented";
@@ -107,6 +107,7 @@ export function Tooltip({ content, open = false, children }: { content: ReactNod
   );
 }
 
+/** Centred dialog. With `sheet`, it docks to the bottom of the screen below 768px. */
 export function Dialog({
   open = true,
   title,
@@ -114,6 +115,7 @@ export function Dialog({
   actions,
   onClose,
   width = 480,
+  sheet = false,
 }: {
   open?: boolean;
   title?: string;
@@ -121,7 +123,17 @@ export function Dialog({
   actions?: ReactNode;
   onClose?: () => void;
   width?: number;
+  sheet?: boolean;
 }) {
+  const panel = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const opener = document.activeElement as HTMLElement | null;
+    panel.current?.focus();
+    return () => opener?.focus();
+  }, [open]);
+
   useEffect(() => {
     if (!open || !onClose) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -131,8 +143,11 @@ export function Dialog({
 
   if (!open) return null;
   return (
-    <div className="ha-dialog-scrim" onClick={(e) => e.target === e.currentTarget && onClose?.()}>
-      <div role="dialog" aria-modal="true" aria-label={title} className="ha-dialog" style={{ maxWidth: width }}>
+    <div
+      className={`ha-dialog-scrim${sheet ? " ha-dialog-scrim--sheet" : ""}`}
+      onClick={(e) => e.target === e.currentTarget && onClose?.()}
+    >
+      <div ref={panel} tabIndex={-1} role="dialog" aria-modal="true" aria-label={title} className="ha-dialog" style={{ maxWidth: width }}>
         {onClose && (
           <div className="ha-dialog__close">
             <IconButton icon={X} label="Close" size="sm" onClick={onClose} />

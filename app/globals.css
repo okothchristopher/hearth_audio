@@ -9,5 +9,6 @@
 /* Styles the prototype applied inline, plus the app shell */
 @import "./styles/components.css";
 @import "./styles/shell.css";
+@import "./styles/speaker.css";
 
 *, *::before, *::after { box-sizing: border-box; }
