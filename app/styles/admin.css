@@ -36,3 +36,24 @@
   .ha-admin-table__actions{text-align:right !important;}
   .ha-admin-table__buttons{display:flex;gap:8px;justify-content:flex-end;align-items:flex-start;}
 }
+
+/* Add/edit speaker (prototype AdminEdit) */
+.ha-speaker-form__back{align-self:flex-start;margin:-24px 0 0 -12px;}
+.ha-speaker-form{display:grid;grid-template-columns:minmax(0,1fr);gap:40px;}
+.ha-speaker-form__fields{display:flex;flex-direction:column;gap:24px;min-width:0;}
+.ha-speaker-form__pair{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;}
+.ha-speaker-form__group{border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:16px;min-width:0;}
+.ha-speaker-form__group legend{padding:0;margin-bottom:4px;}
+.ha-speaker-form__radios{display:flex;gap:24px;}
+.ha-speaker-form__radios .ha-check{min-height:44px;}
+.ha-speaker-form__buttons{display:flex;flex-direction:column;gap:12px;}
+.ha-speaker-form__preview{display:none;}
+.ha-speaker-form__muted{color:var(--text-muted);margin-bottom:12px;}
+
+@media (min-width:768px){
+  .ha-speaker-form__back{margin-top:-40px;}
+  .ha-speaker-form{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:64px;align-items:start;}
+  .ha-speaker-form__pair{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .ha-speaker-form__buttons{flex-direction:row;}
+  .ha-speaker-form__preview{display:block;position:sticky;top:104px;}
+}

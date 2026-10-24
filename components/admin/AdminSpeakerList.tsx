@@ -32,7 +32,7 @@ export function AdminSpeakerList({ speakers }: { speakers: Speaker[] }) {
               <td>
                 <div className="ha-admin-speaker">
                   <div className="ha-admin-speaker__photo">
-                    <SpeakerPhoto ratio="1 / 1" label="" alt={s.name} />
+                    <SpeakerPhoto src={s.photoUrl} ratio="1 / 1" label="" alt={s.name} />
                   </div>
                   <div className="ha-admin-speaker__text">
                     <span className="ha-admin-speaker__name">{s.name}</span>
@@ -63,7 +63,7 @@ export function AdminSpeakerList({ speakers }: { speakers: Speaker[] }) {
           <li key={s.id} className="ha-admin-list__item">
             <div className="ha-admin-speaker">
               <div className="ha-admin-speaker__photo ha-admin-speaker__photo--lg">
-                <SpeakerPhoto ratio="1 / 1" label="" alt={s.name} />
+                <SpeakerPhoto src={s.photoUrl} ratio="1 / 1" label="" alt={s.name} />
               </div>
               <div className="ha-admin-speaker__text">
                 <span className="ha-admin-speaker__name">{s.name}</span>

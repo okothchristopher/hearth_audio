@@ -3,6 +3,7 @@
 
 import type { Status } from "@/components/ui";
 import { formatDayMonth, toNairobiDate } from "./dates";
+import { photoUrl } from "./photos";
 import { publicClient } from "./supabase/server";
 
 export type Speaker = {
@@ -19,6 +20,10 @@ export type Speaker = {
   returnDate?: string;
   description: string;
   details: { kind?: string; tuning?: string; size?: string; room?: string; connections?: string };
+  /** Object path in the speaker-photos bucket */
+  photoPath?: string;
+  /** Public URL of the photo; undefined shows the placeholder */
+  photoUrl?: string;
 };
 
 export type ListeningNote = {
@@ -39,9 +44,10 @@ type SpeakerRow = {
   description: string;
   details: Speaker["details"];
   status: Speaker["status"];
+  photo_path: string | null;
 };
 
-const SPEAKER_COLUMNS = "id, name, type, price_per_month, description, details, status";
+const SPEAKER_COLUMNS = "id, name, type, price_per_month, description, details, status, photo_path";
 
 function toSpeaker(
   row: SpeakerRow,
@@ -59,6 +65,8 @@ function toSpeaker(
     rating: rating ? Number(rating.rating) : undefined,
     noteCount: rating?.note_count ?? 0,
     returnDate: ret?.return_date,
+    photoPath: row.photo_path ?? undefined,
+    photoUrl: row.photo_path ? photoUrl(row.photo_path) : undefined,
   };
 }
 

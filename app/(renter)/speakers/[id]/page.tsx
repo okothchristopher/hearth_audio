@@ -59,7 +59,7 @@ export default async function SpeakerPage({ params }: PageProps<"/speakers/[id]"
       <BackLink />
       <div className="ha-speaker__layout">
         <div className="ha-speaker__photo">
-          <SpeakerPhoto alt={speaker.name} />
+          <SpeakerPhoto src={speaker.photoUrl} alt={speaker.name} />
         </div>
 
         <div className="ha-speaker__summary">

@@ -60,6 +60,7 @@ export async function SpeakerList({ searchParams }: { searchParams: PageProps<"/
             <li key={s.id}>
               <SpeakerCard
                 href={`/speakers/${s.id}`}
+                photo={s.photoUrl}
                 name={s.name}
                 type={s.type}
                 price={formatKes(s.pricePerMonth)}
