@@ -52,6 +52,14 @@ Server pages can't pass component props (e.g. a lucide `icon={Repeat}`) into a `
 - Landing page = Browse: hero, `components/landing/HowItWorks.tsx`, then the speaker list. Location and phone live only in `lib/contact.ts` and render in `components/shell/SiteFooter.tsx`, which the renter layout passes to `AppShell` as `footer`. With a footer, the footer (not `<main>`) reserves the mobile bottom-nav and Rent-bar space (`app/styles/landing.css`).
 - Browse (`app/(renter)/page.tsx` + `components/browse/`) keeps the Available-now filter in the URL (`?filter=available`) and reads it inside `<Suspense>`, whose fallback is the loading skeleton.
 
+## Chat assistant (Gemini)
+
+- `components/chat/ChatWidget.tsx` ("Ask about a speaker", renter pages only) posts the conversation to `app/api/chat/route.ts`, which streams plain text back. `GEMINI_API_KEY` is server-only; never expose it with `NEXT_PUBLIC_`.
+- Instructions and the live catalogue are built in `lib/chat/context.ts` (cached a few minutes with `"use cache"`). Scope: speakers, renting, swapping, delivery, phone number. It can't book or see accounts, must not invent facts, and follows the brand voice; change behaviour there.
+- Models: `gemini-3.5-flash`, falling back to `gemini-3.1-flash-lite` on 404/429/5xx (`GEMINI_MODEL` overrides the first). Google retires models for new keys (`gemini-2.5-flash` returns 404) and newer ones are often overloaded, so check with the API's model list before changing. Keep `thinkingBudget: 0`: with thinking on, answers came back cut off.
+- Answers render as text only (no HTML/markdown); `/speakers/<id>` paths become links. The endpoint caps 20 turns × 1,000 characters and rejects other origins, but has no rate limit: it spends the Gemini quota, so add one (e.g. Vercel Firewall) before heavy traffic.
+- `ChatWidget` is passed through `AppShell`'s `footer` prop, outside `<main>`: a sibling of `{children}` inside `<main>` broke Next's instant-navigation validation.
+
 ## Stack
 
 | Layer | Choice | Notes |
