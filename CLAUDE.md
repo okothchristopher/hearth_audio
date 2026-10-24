@@ -6,7 +6,27 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Hearth Audio is a mobile-first web app for renting a high-end speaker in Kenya for a month, swapping it, and writing listening notes. Product context: [hearth-audio-spec.md](hearth-audio-spec.md).
 
-**There is no application code yet** — the repo holds only product/brand documents, logos, and a Claude Design prototype. There are no build, lint, or test commands until the stack below is scaffolded. Remote: `https://github.com/okothchristopher/hearth_audio` (branch `main`).
+Current state: the design system, app shell and navigation are built; every screen is still a `Placeholder`. Supabase is not wired up yet. Remote: `https://github.com/okothchristopher/hearth_audio` (branch `main`).
+
+## Commands
+
+Node is installed at `C:\Program Files\nodejs` but is not on the shell PATH; in Git Bash prefix commands with `export PATH="/c/Program Files/nodejs:$PATH";`.
+
+- `npm run dev` — dev server (Turbopack)
+- `npm run build` — production build; also generates the route types (`PageProps`, `LayoutProps`) that `npx tsc --noEmit` needs
+- `npm run lint` — ESLint
+- No test runner is set up yet.
+
+Next.js is v16 with `cacheComponents` and `partialPrefetching` on: read `node_modules/next/dist/docs/` before using an API from memory. Practical consequences: a route that reads `params` needs a `loading.tsx` (or `<Suspense>`) and `generateStaticParams` where possible, and client components calling `usePathname` must sit inside `<Suspense>` (see `components/shell/AppShell.tsx`).
+
+## Code layout
+
+- `app/styles/` — design tokens and `hearth.css` copied verbatim from the prototype's `_ds/` folder; `components.css` holds styles the prototype set inline; `shell.css` is the header/bottom-nav/layout. `app/globals.css` imports them in order. Fonts load via `next/font` in `app/layout.tsx` and feed `--font-heading` / `--font-body`.
+- `components/ui/` — React ports of the prototype's design-system components (`_ds_bundle.js`), exported from `components/ui/index.ts`. Icons use `lucide-react` components (the prototype loaded Lucide from a CDN); pass the icon component, e.g. `iconStart={ArrowLeft}`.
+- `components/shell/` — `AppShell` (prototype `AppHeader` + `BottomNav`). Below 768px header links hide and the fixed bottom nav shows, in CSS only.
+- `lib/nav.ts` — renter and admin nav items and their active-path rules (desktop highlights My rental on `/swap`; mobile has a Swap tab). Client nav components take the nav by name because icon components can't cross the server→client boundary as props.
+- Routes: `app/(renter)/` (`/`, `/speakers/[id]`, `/rental`, `/swap`, internal `/design-system` showcase) and `app/admin/` (`/admin`, `/admin/speakers/new`, `/admin/returns`).
+- `lib/sample-speakers.ts` — placeholder content from `claude-design-prompt.md`, to be replaced by Supabase queries.
 
 ## Stack
 

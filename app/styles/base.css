@@ -1,0 +1,16 @@
+html{-webkit-font-smoothing:antialiased;}
+body{margin:0;background:var(--surface-page);color:var(--text-body);font-family:var(--font-body);font-size:var(--type-body-size);line-height:var(--type-body-lh);}
+h1,h2,h3,h4,.ha-display{font-family:var(--font-heading);font-weight:400;font-style:normal;text-wrap:balance;color:var(--text-heading);margin:0;}
+.ha-display{font-size:var(--type-display-size);line-height:var(--type-display-lh);letter-spacing:var(--type-display-track);}
+h1,.ha-h1{font-size:var(--type-h1-size);line-height:var(--type-h1-lh);letter-spacing:var(--type-h1-track);}
+h2,.ha-h2{font-size:var(--type-h2-size);line-height:var(--type-h2-lh);}
+h3,.ha-h3{font-size:var(--type-h3-size);line-height:var(--type-h3-lh);}
+h4,.ha-h4{font-size:var(--type-h4-size);line-height:var(--type-h4-lh);}
+p{margin:0;text-wrap:pretty;}
+.ha-lead{font-size:var(--type-lead-size);line-height:var(--type-lead-lh);}
+.ha-small{font-size:var(--type-small-size);line-height:var(--type-small-lh);}
+.ha-label{font-size:var(--type-label-size);line-height:var(--type-label-lh);letter-spacing:var(--type-label-track);text-transform:uppercase;font-weight:600;}
+.ha-num{font-variant-numeric:tabular-nums;}
+a{color:var(--text-link);text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px;}
+a:hover{color:var(--color-primary-hover);}
+:focus-visible{outline:var(--focus-outline);outline-offset:var(--focus-offset);}

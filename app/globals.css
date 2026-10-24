@@ -1,0 +1,13 @@
+/* Design system: tokens and component styles from the Claude Design prototype
+   (_ds/hearth-audio-design-system-*). Keep these files in sync with that source. */
+@import "./styles/colors.css";
+@import "./styles/typography.css";
+@import "./styles/spacing.css";
+@import "./styles/effects.css";
+@import "./styles/base.css";
+@import "./styles/hearth.css";
+/* Styles the prototype applied inline, plus the app shell */
+@import "./styles/components.css";
+@import "./styles/shell.css";
+
+*, *::before, *::after { box-sizing: border-box; }

@@ -1,0 +1,38 @@
+/* App shell: AppHeader + BottomNav from the prototype. Below 768px the header
+   keeps only the logo and action; navigation moves to the fixed bottom bar. */
+
+.ha-skip-link{position:absolute;left:16px;top:-48px;z-index:20;padding:10px 14px;background:var(--color-graphite);color:var(--color-ivory);border-radius:var(--radius-sm);font-family:var(--font-body);font-weight:600;text-decoration:none;}
+.ha-skip-link:focus{top:12px;color:var(--color-ivory);}
+
+.ha-header{position:sticky;top:0;z-index:10;background:rgba(251,244,233,.86);backdrop-filter:saturate(1.2) blur(12px);-webkit-backdrop-filter:saturate(1.2) blur(12px);border-bottom:1px solid var(--color-line);font-family:var(--font-body);}
+.ha-header__inner{max-width:var(--container-max);margin:0 auto;padding:0 12px 0 16px;height:64px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.ha-header__home{height:44px;padding:0 4px;margin-left:-4px;display:flex;align-items:center;border-radius:var(--radius-sm);text-decoration:none;}
+.ha-header__nav{display:none;}
+.ha-header__user{display:none;font-size:15px;color:var(--text-muted);}
+
+.ha-bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:10;display:flex;padding:0 8px calc(12px + env(safe-area-inset-bottom));background:rgba(251,244,233,.86);backdrop-filter:saturate(1.2) blur(12px);-webkit-backdrop-filter:saturate(1.2) blur(12px);border-top:1px solid var(--color-line);font-family:var(--font-body);}
+.ha-bottom-nav__item{flex:1;min-height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border-top:2px solid transparent;color:var(--text-muted);font-size:13px;font-weight:500;text-decoration:none;transition:color var(--dur-fast) var(--ease-standard);}
+.ha-bottom-nav__item:hover{color:var(--color-text);}
+.ha-bottom-nav__item[aria-current="page"]{border-top-color:var(--color-accent);color:var(--color-text);font-weight:600;}
+
+.ha-main{max-width:var(--container-max);margin:0 auto;padding:var(--space-7) 16px calc(96px + env(safe-area-inset-bottom));}
+
+@media (min-width:768px){
+  .ha-header__inner{padding:0 var(--gutter);height:72px;gap:40px;justify-content:flex-start;}
+  .ha-header__nav{display:flex;gap:28px;flex:1;}
+  .ha-header__nav .ha-nav-link{height:44px;display:flex;align-items:center;}
+  .ha-header__user{display:inline;}
+  .ha-bottom-nav{display:none;}
+  .ha-main{padding:var(--space-8) var(--gutter) var(--space-9);}
+}
+
+/* Placeholder page */
+.ha-placeholder{display:grid;gap:var(--space-5);max-width:var(--measure);}
+.ha-placeholder__eyebrow{color:var(--text-muted);}
+.ha-placeholder__note{padding:var(--space-5);border:1px dashed var(--color-line-strong);border-radius:var(--radius-md);color:var(--text-muted);}
+.ha-skeleton{background:var(--color-surface-sunken);border-radius:var(--radius-sm);}
+.ha-placeholder__links{display:flex;flex-wrap:wrap;gap:12px;}
+
+.ha-grid{display:grid;grid-template-columns:1fr;gap:var(--space-6);margin-top:var(--space-7);}
+@media (min-width:768px){.ha-grid{grid-template-columns:repeat(2,1fr);}}
+@media (min-width:1280px){.ha-grid{grid-template-columns:repeat(3,1fr);}}
