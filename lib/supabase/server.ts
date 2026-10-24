@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
+import { io } from "next/cache";
 import { cookies } from "next/headers";
 import { SUPABASE_KEY, SUPABASE_URL } from "./env";
 
@@ -31,6 +32,9 @@ export const publicClient = createClient(SUPABASE_URL, SUPABASE_KEY, {
 
 /** The signed-in user's id and email, verified against the auth server's keys; null when signed out. */
 export async function getSignedInUser(supabase: Awaited<ReturnType<typeof createUserClient>>) {
+  // getClaims checks token expiry with Date.now(), which Next won't prerender. io()
+  // suspends only during prerendering and resolves at once in requests and actions.
+  await io();
   const { data } = await supabase.auth.getClaims();
   const claims = data?.claims;
   return claims ? { id: claims.sub, email: claims.email as string | undefined } : null;

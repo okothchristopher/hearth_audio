@@ -1,7 +1,6 @@
 // Who is using the admin area. Row-level security is what actually protects the
 // data; this decides what the admin pages show. Reads cookies: use inside <Suspense>.
 
-import { connection } from "next/server";
 import { createUserClient, getSignedInUser } from "./supabase/server";
 
 type Client = Awaited<ReturnType<typeof createUserClient>>;
@@ -12,9 +11,6 @@ export type AdminContext =
   | { status: "admin"; supabase: Client; userId: string };
 
 export async function getAdminContext(): Promise<AdminContext> {
-  // Always request-time: Supabase's session check reads the clock (Date.now), which
-  // Next refuses to prerender on routes with dynamic params.
-  await connection();
   const supabase = await createUserClient();
   const user = await getSignedInUser(supabase);
   if (!user) return { status: "signed-out" };
