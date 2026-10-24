@@ -12,5 +12,6 @@
 @import "./styles/speaker.css";
 @import "./styles/rental.css";
 @import "./styles/swap.css";
+@import "./styles/admin.css";
 
 *, *::before, *::after { box-sizing: border-box; }

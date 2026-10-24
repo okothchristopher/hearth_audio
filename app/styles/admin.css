@@ -1,0 +1,38 @@
+/* Admin screens (prototype AdminSpeakers / AdminEdit / AdminReturns). Mobile first. */
+
+.ha-admin{display:flex;flex-direction:column;gap:32px;}
+.ha-admin__head{display:flex;flex-direction:column;gap:20px;}
+.ha-admin__title{display:flex;flex-direction:column;gap:8px;}
+.ha-admin__summary{color:var(--text-muted);font-variant-numeric:tabular-nums;}
+.ha-admin__head .ha-btn{width:100%;}
+
+.ha-admin-speaker{display:flex;align-items:center;gap:16px;min-width:0;}
+.ha-admin-speaker__photo{width:56px;flex:none;border-radius:var(--radius-sm);overflow:hidden;}
+.ha-admin-speaker__photo--lg{width:64px;}
+.ha-admin-speaker__text{display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-width:0;}
+.ha-admin-speaker__name{font-weight:600;}
+.ha-admin-speaker__muted{color:var(--text-muted);}
+
+/* Phones: stacked rows */
+.ha-admin-table{display:none;}
+.ha-admin-list{list-style:none;margin:0;padding:0;border-bottom:1px solid var(--color-line);}
+.ha-admin-list__item{display:flex;flex-direction:column;gap:16px;padding:20px 0;border-top:1px solid var(--color-line);}
+.ha-admin-list__buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.ha-status-toggle{display:flex;flex-direction:column;gap:6px;}
+
+.ha-admin-skeleton{display:flex;flex-direction:column;border-bottom:1px solid var(--color-line);}
+.ha-admin-skeleton__row{display:flex;align-items:center;gap:16px;padding:16px 0;border-top:1px solid var(--color-line);}
+.ha-admin-skeleton__text{flex:1;display:flex;flex-direction:column;gap:8px;}
+
+@media (min-width:768px){
+  .ha-admin__head{flex-direction:row;justify-content:space-between;align-items:flex-end;}
+  .ha-admin__head .ha-btn{width:auto;}
+  .ha-admin-list{display:none;}
+  .ha-admin-table{display:table;width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;}
+  .ha-admin-table th{text-align:left;font-size:14px;font-weight:600;color:var(--text-muted);padding:0 16px 12px;border-bottom:1px solid var(--color-line-strong);}
+  .ha-admin-table td{padding:16px;border-bottom:1px solid var(--color-line);font-size:15px;vertical-align:middle;}
+  .ha-admin-table th:first-child,.ha-admin-table td:first-child{padding-left:0;}
+  .ha-admin-table th:last-child,.ha-admin-table td:last-child{padding-right:0;}
+  .ha-admin-table__actions{text-align:right !important;}
+  .ha-admin-table__buttons{display:flex;gap:8px;justify-content:flex-end;align-items:flex-start;}
+}

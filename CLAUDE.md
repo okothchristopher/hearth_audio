@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Hearth Audio is a mobile-first web app for renting a high-end speaker in Kenya for a month, swapping it, and writing listening notes. Product context: [hearth-audio-spec.md](hearth-audio-spec.md).
 
-Current state: Browse, Speaker page + booking, My rental and Swap are built on Supabase (auth, booking, listening notes, swap collection days). The admin screens are still `Placeholder`s, and admin routes are not yet restricted to admins. Remote: `https://github.com/okothchristopher/hearth_audio` (branch `main`).
+Current state: Browse, Speaker page + booking, My rental and Swap are built on Supabase (auth, booking, listening notes, swap collection days). Admin: the Speakers list is built; Add/edit speaker and Returns are still `Placeholder`s. Every admin page wraps its content in `<Suspense><AdminGate>…</AdminGate></Suspense>` (signed-out → sign-in prompt, non-admin → "team only"). Keep the gate inside the page, not in `app/admin/layout.tsx`: a layout that withholds `children` trips Next's instant-navigation validation ("segment was dropped from rendering"). Remote: `https://github.com/okothchristopher/hearth_audio` (branch `main`).
 
 ## Commands
 
