@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Hearth Audio is a mobile-first web app for renting a high-end speaker in Kenya for a month, swapping it, and writing listening notes. Product context: [hearth-audio-spec.md](hearth-audio-spec.md).
 
-Current state: Browse, Speaker page + booking, and My rental are built on Supabase (auth, booking, listening notes). Swap and the admin screens are still `Placeholder`s, and admin routes are not yet restricted to admins. Remote: `https://github.com/okothchristopher/hearth_audio` (branch `main`).
+Current state: Browse, Speaker page + booking, My rental and Swap are built on Supabase (auth, booking, listening notes, swap collection days). The admin screens are still `Placeholder`s, and admin routes are not yet restricted to admins. Remote: `https://github.com/okothchristopher/hearth_audio` (branch `main`).
 
 ## Commands
 
@@ -19,11 +19,14 @@ Node is installed at `C:\Program Files\nodejs` but is not on the shell PATH; in 
 
 Next.js is v16 with `cacheComponents` and `partialPrefetching` on: read `node_modules/next/dist/docs/` before using an API from memory. Practical consequences: a route that reads `params`, `searchParams` or cookies (the Supabase session) needs a `loading.tsx` or `<Suspense>`, and client components calling `usePathname` must sit inside `<Suspense>` (see `components/shell/AppShell.tsx`). Session refresh lives in `proxy.ts` (Next 16's rename of `middleware.ts`).
 
+Server pages can't pass component props (e.g. a lucide `icon={Repeat}`) into a `"use client"` component — it fails at render with "Functions cannot be passed directly to Client Components". Components that take an icon prop and have no state (`MessagePanel`, `Button`) must stay out of `"use client"` files.
+
 ## Supabase
 
 - Env: `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in `.env` / `.env.local` (template: `.env.example`). No secret key is used.
 - Schema lives in `supabase/migrations/` and sample content in `supabase/seed.sql`; both are run by hand in the Supabase SQL Editor (no CLI). Add schema changes as a new numbered migration file, never by editing an applied one.
 - Clients (`lib/supabase/`): `publicClient` for public reads (no cookies, keeps Browse and Speaker pages fast); `createUserClient()` + `getSignedInUser()` for anything acting as the user (server actions, My rental); `browserClient()` / `useUser()` in client components for sign-in state.
+- Swap (`0002_swap.sql`): renters can't update `rentals`, so booking a collection day goes through the `request_swap` security-definer function (own active rental, tomorrow ≤ day ≤ return date). The admin sets `returned_at` on collection.
 - Writes go through server actions in `app/(renter)/actions.ts` and rely on row-level security, not app checks: renters insert only their own rentals and notes, a note needs a rental of that speaker, and overlapping bookings fail with SQLSTATE `23P01` (mapped to the prompt's "Someone just booked this speaker" copy).
 - Triggers do bookkeeping the client can't be trusted with: a `people` row on sign-up, speaker `status` from active rentals, and note `author_name`/`author_area` copied from `people` (people rows are private, notes are public).
 - Make an admin with `update public.people set role = 'admin' where email = '…';` in the SQL Editor.

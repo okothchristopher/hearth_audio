@@ -6,6 +6,7 @@ import {
   Button,
   Card,
   Checkbox,
+  DayPicker,
   Dialog,
   ErrorBanner,
   MessagePanel,
@@ -40,6 +41,7 @@ export function Showcase() {
   const [available, setAvailable] = useState(true);
   const [tab, setTab] = useState<"notes" | "details">("notes");
   const [dialog, setDialog] = useState(false);
+  const [day, setDay] = useState<string>();
 
   return (
     <>
@@ -116,6 +118,14 @@ export function Showcase() {
             <Radio name="room" label="Small room" defaultChecked />
             <Radio name="room" label="Large room" />
           </div>
+          <DayPicker
+            label="Collection and delivery day"
+            hint="We collect your speaker and bring the next one on this day."
+            from="2026-10-25"
+            count={14}
+            value={day}
+            onChange={setDay}
+          />
         </div>
       </Section>
 
@@ -162,6 +172,9 @@ export function Showcase() {
           </ErrorBanner>
           <MessagePanel icon={Speaker} title="Every speaker is rented right now." actions={<Button size="lg">Show all speakers</Button>}>
             Turn off the filter to see when they return.
+          </MessagePanel>
+          <MessagePanel tone="success" title="Collection booked for Thu 29 Oct 2026." actions={<Button size="lg">Choose your next speaker</Button>}>
+            Your note on the Ember Monitor is published. Now choose what you want to hear next.
           </MessagePanel>
         </div>
       </Section>

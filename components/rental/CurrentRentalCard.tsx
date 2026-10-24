@@ -23,6 +23,12 @@ export function CurrentRentalCard({ rental }: { rental: Rental }) {
             <dt>Returns</dt>
             <dd>{formatDate(rental.returnDate)}</dd>
           </div>
+          {rental.collectionDate && (
+            <div>
+              <dt>Collection</dt>
+              <dd>{formatDate(rental.collectionDate)}</dd>
+            </div>
+          )}
         </dl>
         <p className="ha-current__left ha-num">{left === 1 ? "1 day left" : `${left} days left`}</p>
         <progress className="ha-progress" max={RENTAL_DAYS} value={elapsed} aria-label={`Day ${elapsed} of ${RENTAL_DAYS}`} />

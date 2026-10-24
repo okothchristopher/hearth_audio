@@ -33,6 +33,46 @@ export async function bookSpeaker(speakerId: string, startDate: string): Promise
   return { ok: true, startDate, returnDate: addDays(startDate, RENTAL_DAYS) };
 }
 
+export type SwapResult =
+  | { ok: true; collectionDate: string }
+  | (Failure<"signin" | "invalid" | "note" | "error"> & { noteSaved: boolean });
+
+/**
+ * Swap: save the listening note (unless one exists), then book the collection day
+ * through the request_swap database function. If the note saves but booking fails,
+ * the note is kept and a retry skips straight to booking.
+ */
+export async function requestSwap(input: {
+  rentalId: string;
+  speakerId: string;
+  collectionDate: string;
+  note?: { stars: number; text: string };
+}): Promise<SwapResult> {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(input.collectionDate)) {
+    return { ok: false, reason: "invalid", message: "Choose a collection day.", noteSaved: false };
+  }
+
+  const noteSaved = !!input.note;
+  if (input.note) {
+    const saved = await saveNote(input.speakerId, input.note.stars, input.note.text);
+    if (!saved.ok) return { ...saved, reason: saved.reason === "error" ? "note" : saved.reason, noteSaved: false };
+  }
+
+  const supabase = await createUserClient();
+  const { error } = await supabase.rpc("request_swap", {
+    p_rental_id: input.rentalId,
+    p_collection_date: input.collectionDate,
+  });
+  if (error?.code === "22023") {
+    return { ok: false, reason: "invalid", message: "Choose a collection day before your return date.", noteSaved };
+  }
+  if (error) {
+    console.error("requestSwap", error);
+    return { ok: false, reason: "error", message: "Your note is kept. Try again in a moment.", noteSaved };
+  }
+  return { ok: true, collectionDate: input.collectionDate };
+}
+
 export type NoteResult = { ok: true } | Failure<"signin" | "invalid" | "error">;
 
 /** Save a listening note. The database only accepts notes on speakers the renter has rented. */

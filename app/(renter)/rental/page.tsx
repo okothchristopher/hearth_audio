@@ -47,7 +47,7 @@ async function RentalContent() {
         <>
           <CurrentRentalCard rental={current} />
           <ListeningNoteSection rental={current} />
-          <Button href="/" variant="secondary" className="ha-rental__swap">
+          <Button href="/swap" variant="secondary" className="ha-rental__swap">
             Swap for a different speaker
           </Button>
         </>
