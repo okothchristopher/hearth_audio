@@ -19,6 +19,8 @@ Node is installed at `C:\Program Files\nodejs` but is not on the shell PATH; in 
 
 Next.js is v16 with `cacheComponents` and `partialPrefetching` on: read `node_modules/next/dist/docs/` before using an API from memory. Practical consequences: a route that reads `params`, `searchParams` or cookies (the Supabase session) needs a `loading.tsx` or `<Suspense>`, and client components calling `usePathname` must sit inside `<Suspense>` (see `components/shell/AppShell.tsx`). Session refresh lives in `proxy.ts` (Next 16's rename of `middleware.ts`).
 
+404 and error pages: `app/not-found.tsx` (unmatched URLs; adds the renter `AppShell` itself because only the root layout wraps it), `app/(renter)/not-found.tsx` and `app/admin/not-found.tsx` (for `notFound()` inside those areas — their layouts already supply the header, so they must not add another), `error.tsx` in both areas, and `app/global-error.tsx`. Next 16 error boundaries receive `retry` (re-fetches), not the older `reset`.
+
 Server pages can't pass component props (e.g. a lucide `icon={Repeat}`) into a `"use client"` component — it fails at render with "Functions cannot be passed directly to Client Components". Components that take an icon prop and have no state (`MessagePanel`, `Button`) must stay out of `"use client"` files.
 
 ## Supabase
